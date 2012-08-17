@@ -7,10 +7,10 @@ import (
 
 func parseHex(s string) fermat {
 	z := new(big.Int)
-      z, ok := z.SetString(s, 0)
-      if !ok {
-            panic(s)
-      }
+	z, ok := z.SetString(s, 0)
+	if !ok {
+		panic(s)
+	}
 	return append(fermat(z.Bits()), 0)
 }
 
@@ -42,41 +42,39 @@ var addTests = []test{
 		parseHex("0x5555555555555555555555555555555555555555555555555555555555555555"),
 		parseHex("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"),
 		parseHex("0x10000000000000000000000000000000000000000000000000000000000000000"),
-      },
+	},
 	{
 		parseHex("0x5555555555555555555555555555555555555555555555555555555555555555"),
 		parseHex("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 		parseHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-      },
+	},
 	{
 		parseHex("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 		parseHex("0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
 		parseHex("0x5555555555555555555555555555555555555555555555555555555555555553"),
-      },
+	},
 }
 
 func TestFermatAdd(t *testing.T) {
-      for _, item := range addTests {
-            z := make(fermat, len(item.a))
-            z = z.Add(item.a, item.b)
-            compare(t, z, item.c)
-      }
+	for _, item := range addTests {
+		z := make(fermat, len(item.a))
+		z = z.Add(item.a, item.b)
+		compare(t, z, item.c)
+	}
 }
 
 var mulTests = []test{
-      { // 3^400 = 3^200 * 3^200
-            parseHex("0xc21a937a76f3432ffd73d97e447606b683ecf6f6e4a7ae223c2578e26c486a03"),
-            parseHex("0xc21a937a76f3432ffd73d97e447606b683ecf6f6e4a7ae223c2578e26c486a03"),
-            parseHex("0x0e65f4d3508036eaca8faa2b8194ace009c863e44bdc040c459a7127bf8bcc62"),
-      },
+	{ // 3^400 = 3^200 * 3^200
+		parseHex("0xc21a937a76f3432ffd73d97e447606b683ecf6f6e4a7ae223c2578e26c486a03"),
+		parseHex("0xc21a937a76f3432ffd73d97e447606b683ecf6f6e4a7ae223c2578e26c486a03"),
+		parseHex("0x0e65f4d3508036eaca8faa2b8194ace009c863e44bdc040c459a7127bf8bcc62"),
+	},
 }
 
 func TestFermatMul(t *testing.T) {
-      for _, item := range mulTests {
-            z := make(fermat, len(item.a))
-            z = z.Mul(item.a, item.b)
-            compare(t, z, item.c)
-      }
+	for _, item := range mulTests {
+		z := make(fermat, len(item.a))
+		z = z.Mul(item.a, item.b)
+		compare(t, z, item.c)
+	}
 }
-
-

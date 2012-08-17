@@ -6,8 +6,9 @@ import (
 
 // Arithmetic modulo 2^n+1.
 
-// A fermat of length w+1 represents a number modulo
-// 2^(w*_W) + 1. The last word is zero or one.
+// A fermat of length w+1 represents a number modulo 2^(w*_W) + 1. The last
+// word is zero or one. A number has at most two representatives satisfying the
+// 0-1 last word constraint.
 type fermat nat
 
 // Shift computes (x << k) mod (2^n+1).
@@ -88,15 +89,20 @@ func (z fermat) Mul(x, y fermat) fermat {
 	z = z[:n+1]
 	z[n]++ // Add -1.
 	subVW(z[i+1:], z[i+1:], c)
-      addVW(z, z, 1)
 	// Normalize.
-      c = z[n]
+	c = z[n]
 	if z[0] >= c {
-            z[n] = 0
+		z[n] = 0
 		z[0] -= c
 	} else {
 		z[n] = 1
 		subVW(z, z, c-1)
+	}
+	// Add 1.
+	if z[n] == 1 {
+		z[n] = 0
+	} else {
+		addVW(z, z, 1)
 	}
 	return z
 }
