@@ -27,6 +27,16 @@ func fftSize(x, y nat) (k uint, m int) {
 	return
 }
 
+// poly represents an integer via a polynomial in Z[x]/(x^K+1)
+// where K is the FFT length and b is the computation basis 1<<(m*_W).
+// If P = a[0] + a[1] x + ... a[n] x^(K-1), the associated natural number
+// is P(b^m).
+type poly struct {
+	k uint  // k is such that K = 1<<k.
+	m int   // the m such that P(b^m) is the original number.
+	a []nat // a slice of at most K m-word coefficients.
+}
+
 // polyFromNat slices the number x into a polynomial
 // with 1<<k coefficients made of m words.
 func polyFromNat(x nat, k uint, m int) poly {
@@ -36,23 +46,13 @@ func polyFromNat(x nat, k uint, m int) poly {
 	for i := range p.a {
 		if len(x) < m {
 			p.a[i] = make(nat, m)
-                  copy(p.a[i], x)
+			copy(p.a[i], x)
 			break
 		}
 		p.a[i] = x[:m]
 		x = x[m:]
 	}
 	return p
-}
-
-// poly represents an integer via a polynomial in Z[x]/(x^K+1)
-// where K is the FFT length and b is the computation basis 1<<(m*_W).
-// If P = a[0] + a[1] x + ... a[n] x^(K-1), the associated natural number
-// is P(b^m).
-type poly struct {
-	k uint  // k is such that K = 1<<k.
-	m int   // the m such that P(b^m) is the original number.
-	a []nat // a slice of at most K m-word coefficients.
 }
 
 // Int evaluates back a poly to its integer value.

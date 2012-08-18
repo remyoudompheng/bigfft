@@ -32,9 +32,9 @@ func cmpnat(t *testing.T, x, y nat) int {
 func TestRoundTripIntPoly(t *testing.T) {
 	N := 10
 	step := 500
-      // Sizes 12800 and 34300 may cause problems.
+	// Sizes 12800 and 34300 may cause problems.
 	for size := 300; size < 50000; size += step {
-            n := make(nat, size)
+		n := make(nat, size)
 		for i := 0; i < N; i++ {
 			for p := range n {
 				n[p] = Word(rand.Int63())
