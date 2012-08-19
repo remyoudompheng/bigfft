@@ -66,8 +66,16 @@ func (z fermat) Shift(x fermat, k int) {
 	}
 	z[n] = 1 // Add (-1)
 	b := subVV(z[:kw+1], z[:kw+1], x[n-kw:])
-	subVW(z[kw+1:], z[kw+1:], b)
-	addVW(z, z, 1) // Add back 1.
+	if z[kw+1] > 0 {
+		z[kw+1] -= b
+	} else {
+		subVW(z[kw+1:], z[kw+1:], b)
+	}
+	if z[0] < ^Word(0) {
+		z[0]++
+	} else {
+		addVW(z, z, 1) // Add back 1.
+	}
 	// Shift left by kb bits
 	shlVU(z, z, uint(kb))
 	if neg {
@@ -85,8 +93,11 @@ func (x fermat) Neg() {
 		x[i] = ^a
 	}
 	x[n] = 0
-	c = addVW(x[:n], x[:n], c+2)
-	x[n] = c
+	if x[0] <= ^Word(0)-(c+2) {
+		x[0] += c + 2
+	} else {
+		x[n] = addVW(x[:n], x[:n], c+2)
+	}
 	x.norm()
 	return
 }
@@ -112,25 +123,17 @@ func (z fermat) Mul(x, y fermat) fermat {
 	if len(z) > 2*n+1 {
 		panic("len(z) > 2n+1")
 	}
-	i := len(z) - (n + 1)
+	i := len(z) - (n + 1) // i <= n
 	c := subVV(z[1:i+1], z[1:i+1], z[n+1:])
 	z = z[:n+1]
 	z[n]++ // Add -1.
 	subVW(z[i+1:], z[i+1:], c)
-	// Normalize.
-	c = z[n]
-	if z[0] >= c {
-		z[n] = 0
-		z[0] -= c
-	} else {
-		z[n] = 1
-		subVW(z, z, c-1)
-	}
 	// Add 1.
 	if z[n] == 1 {
 		z[n] = 0
 	} else {
 		addVW(z, z, 1)
 	}
+	z.norm()
 	return z
 }

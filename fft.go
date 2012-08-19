@@ -15,24 +15,72 @@ func (n nat) String() string {
 	return v.String()
 }
 
+// Mul sets z to the product x*y and returns z.
+// It can be used instead of the Int.Mul method of
+// math/big.
+func Mul(x, y *Int) *Int {
+	var xb, yb nat = x.Bits(), y.Bits()
+	zb := fftmul(xb, yb)
+	z := new(Int)
+	z.SetBits(zb)
+	if x.Sign()*y.Sign() < 0 {
+		z.Neg(z)
+	}
+	return z
+}
+
+// A FFT size of K=1<<k is adequate when K is about 2*sqrt(N) where
+// N = x.Bitlen() + y.Bitlen().
+
+func fftmul(x, y nat) nat {
+	k, m := fftSize(x, y)
+	xp := polyFromNat(x, k, m)
+	yp := polyFromNat(y, k, m)
+	rp := xp.Mul(&yp)
+	return rp.Int()
+}
+
 // returns the FFT length k, m the number of words per chunk
+// such that m << k is larger than the number of words
+// in x*y.
 func fftSize(x, y nat) (k uint, m int) {
 	words := len(x) + len(y)
 	bits := int64(words) * int64(_W)
 	switch {
 	case bits < 1<<12:
-		k = 6 // chunks have less than 64 bits.
+		k = 4
+	case bits < 1<<14:
+		k = 6
+	case bits < 1<<16:
+		k = 7
 	case bits < 1<<18:
-		k = 8 // chunks have less than 1024 bits.
+		k = 8
+	case bits < 1<<20:
+		k = 9
+	case bits < 1<<22:
+		k = 10
 	case bits < 1<<24:
-		k = 10 // chunks have less than 64*N>>k < 8192 bits.
+		k = 11
+	case bits < 1<<26:
+		k = 12
+	case bits < 1<<28:
+		k = 13
 	case bits < 1<<30:
-		k = 14 // chunks have less than 64*(1<<10) < 64kbits
+		k = 14 // chunks have less than 64kb
 	default:
-		k = 16
+		k = 15
 	}
 	m = words>>k + 1
 	return
+}
+
+func valueSize(k uint, m int) int {
+	n := 2*m*_W + int(k)
+	if k < 6 {
+		k = 6 // division by _W must not round down
+	}
+	n = ((n >> k) + 1) << k
+	return n / _W
 }
 
 // poly represents an integer via a polynomial in Z[x]/(x^K+1)
@@ -95,10 +143,16 @@ func trim(n nat) nat {
 	return nil
 }
 
-func (p *poly) valueSize() int {
-	n := 2*p.m*_W + int(p.k)
-	n = ((n >> p.k) + 1) << p.k
-	return n / _W
+// Mul multiplies p and q modulo X^K+1, where K = 1<<p.k.
+// The product is done via a Fourier transform.
+func (p *poly) Mul(q *poly) poly {
+	n := valueSize(p.k, p.m)
+
+	pv, qv := p.Transform(n), q.Transform(n)
+	rv := pv.Mul(&qv)
+	r := rv.InvTransform()
+	r.m = p.m
+	return r
 }
 
 // A polValues represents the value of a poly at the odd powers of a
@@ -114,6 +168,9 @@ type polValues struct {
 // and ω = θ².
 func (p *poly) Transform(n int) polValues {
 	k := p.k
+	if len(p.a) >= 1<<k {
+		panic("Transform: len(p.a) >= 1<<k")
+	}
 	// θ is represented as a shift.
 	θshift := (n * _W) >> k
 	// p(x) = a_0 + a_1 x + ... + a_{K-1} x^(K-1)
@@ -232,3 +289,17 @@ func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 	rec(dst, src, k)
 }
 
+// Mul returns the pointwise product of p and q.
+func (p *polValues) Mul(q *polValues) (r polValues) {
+	n := p.n
+	r.k, r.n = p.k, p.n
+	r.values = make([]fermat, len(p.values))
+	bits := make([]Word, len(p.values)*(n+1))
+	buf := make(fermat, 8*n)
+	for i := range r.values {
+		r.values[i] = bits[i*(n+1) : (i+1)*(n+1)]
+		z := buf.Mul(p.values[i], q.values[i])
+		copy(r.values[i], z)
+	}
+	return
+}
