@@ -128,8 +128,17 @@ func (z fermat) Mul(x, y fermat) fermat {
 	xi.SetBits(x)
 	yi.SetBits(y)
 	zi.SetBits(z)
-	z = zi.Mul(&xi, &yi).Bits()
+	zb := zi.Mul(&xi, &yi).Bits()
 	n := len(x) - 1
+	if len(zb) <= n {
+		// Short product.
+		copy(z, zb)
+		for i := len(zb); i < len(z); i++ {
+			z[i] = 0
+		}
+		return z
+	}
+	z = zb
 	// len(z) is at most 2n+1.
 	if len(z) > 2*n+1 {
 		panic("len(z) > 2n+1")
