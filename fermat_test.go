@@ -54,26 +54,6 @@ func TestFermatShift(t *testing.T) {
 	}
 }
 
-func TestFermatNeg(t *testing.T) {
-	const n = 4
-	b := NewInt(1)
-	b = b.Lsh(b, uint(n*_W))
-	b = b.Add(b, NewInt(1))
-	z := make(fermat, n+1)
-	for i := 0; i < n; i++ {
-		z[i] = Word(rand.Int63())
-	}
-
-	neg1 := new(Int)
-	neg1.SetBits(z)
-	neg1 = new(Int).Sub(b, neg1)
-	z.Neg()
-
-	if err := compare(t, neg1.Bits(), z); err != nil {
-		t.Errorf("error in neg")
-	}
-}
-
 type test struct{ a, b, c fermat }
 
 // addTests is a series of mod 2^256+1 tests.

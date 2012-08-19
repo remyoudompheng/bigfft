@@ -277,9 +277,7 @@ func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 			return
 		case 1:
 			dst[0].Add(src[0], src[1<<idxShift]) // dst[0] = src[0] + src[1]
-			copy(dst[1], src[1<<idxShift])
-			dst[1].Neg()
-			dst[1].Add(src[0], dst[1]) // dst[1] = src[0] - src[1]
+			dst[1].Sub(src[0], src[1<<idxShift]) // dst[1] = src[0] - src[1]
 			return
 		}
 

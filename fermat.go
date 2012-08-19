@@ -56,50 +56,42 @@ func (z fermat) Shift(x fermat, k int) {
 		k -= n * _W
 		neg = true
 	}
+
 	kw, kb := k/_W, k%_W
-	// Shift left by kw words.
-	// x = a·2^(n-k) + b
-	// x<<k = (b<<k) - a
-	copy(z[kw:], x[:n-kw])
-	for i := 0; i < kw; i++ {
-		z[i] = 0
-	}
+
 	z[n] = 1 // Add (-1)
-	b := subVV(z[:kw+1], z[:kw+1], x[n-kw:])
-	if z[kw+1] > 0 {
-		z[kw+1] -= b
+	if !neg {
+		for i := 0; i < kw; i++ {
+			z[i] = 0
+		}
+		// Shift left by kw words.
+		// x = a·2^(n-k) + b
+		// x<<k = (b<<k) - a
+		copy(z[kw:], x[:n-kw])
+		b := subVV(z[:kw+1], z[:kw+1], x[n-kw:])
+		if z[kw+1] > 0 {
+			z[kw+1] -= b
+		} else {
+			subVW(z[kw+1:], z[kw+1:], b)
+		}
 	} else {
-		subVW(z[kw+1:], z[kw+1:], b)
+		for i := kw + 1; i < n; i++ {
+			z[i] = 0
+		}
+		// Shift left and negate, by kw words.
+		copy(z[:kw+1], x[n-kw:n+1])            // z_low = x_high
+		b := subVV(z[kw:n], z[kw:n], x[:n-kw]) // z_high -= x_low
+		z[n] -= b
 	}
+	// Add back 1.
 	if z[0] < ^big.Word(0) {
 		z[0]++
 	} else {
-		addVW(z, z, 1) // Add back 1.
+		addVW(z, z, 1)
 	}
 	// Shift left by kb bits
 	shlVU(z, z, uint(kb))
-	if neg {
-		z.Neg()
-	}
 	z.norm()
-}
-
-// Neg computes the opposite of x mod 2^n+1.
-func (x fermat) Neg() {
-	n := len(x) - 1
-	c := x[n]
-	// 2^n + 1 - x = ^x + 2.
-	for i, a := range x {
-		x[i] = ^a
-	}
-	x[n] = 0
-	if x[0] <= ^big.Word(0)-(c+2) {
-		x[0] += c + 2
-	} else {
-		x[n] = addVW(x[:n], x[:n], c+2)
-	}
-	x.norm()
-	return
 }
 
 // Add computes addition mod 2^n+1.
