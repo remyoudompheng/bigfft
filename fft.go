@@ -1,3 +1,7 @@
+// Package bigfft implements multiplication of big.Int using FFT.
+//
+// The implementation is based on the Schönhage-Strassen method
+// using integer FFT modulo 2^n+1.
 package bigfft
 
 import (
@@ -19,7 +23,7 @@ func (n nat) String() string {
 // Karatsuba from math/big
 var fftThreshold = int(250e3)
 
-// Mul sets z to the product x*y and returns z.
+// Mul computes the product x*y and returns z.
 // It can be used instead of the Mul method of
 // *big.Int from math/big package.
 func Mul(x, y *big.Int) *big.Int {
