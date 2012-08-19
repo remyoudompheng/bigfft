@@ -215,7 +215,7 @@ func benchmarkMulFFT(b *testing.B, sizex, sizey int) {
 		var x, y Int
 		x.SetBits(mulx)
 		y.SetBits(muly)
-		_ = Mul(&x, &y)
+		_ = mulFFT(&x, &y)
 	}
 }
 
@@ -240,3 +240,25 @@ func BenchmarkMulFFT_10Mb(b *testing.B)  { benchmarkMulFFT(b, 10e6, 10e6) }
 func BenchmarkMulFFT_20Mb(b *testing.B)  { benchmarkMulFFT(b, 20e6, 20e6) }
 func BenchmarkMulFFT_50Mb(b *testing.B)  { benchmarkMulFFT(b, 50e6, 50e6) }
 func BenchmarkMulFFT_100Mb(b *testing.B) { benchmarkMulFFT(b, 100e6, 100e6) }
+
+func benchmarkMul(b *testing.B, sizex, sizey int) {
+	mulx := rndNat(sizex / _W)
+	muly := rndNat(sizey / _W)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		var x, y Int
+		x.SetBits(mulx)
+		y.SetBits(muly)
+		_ = Mul(&x, &y)
+	}
+}
+
+func BenchmarkMul_1kb(b *testing.B)   { benchmarkMul(b, 1e3, 1e3) }
+func BenchmarkMul_10kb(b *testing.B)  { benchmarkMul(b, 1e4, 1e4) }
+func BenchmarkMul_100kb(b *testing.B) { benchmarkMul(b, 1e5, 1e5) }
+func BenchmarkMul_1Mb(b *testing.B)   { benchmarkMul(b, 1e6, 1e6) }
+func BenchmarkMul_5Mb(b *testing.B)   { benchmarkMul(b, 5e6, 5e6) }
+func BenchmarkMul_10Mb(b *testing.B)  { benchmarkMul(b, 10e6, 10e6) }
+func BenchmarkMul_20Mb(b *testing.B)  { benchmarkMul(b, 20e6, 20e6) }
+func BenchmarkMul_50Mb(b *testing.B)  { benchmarkMul(b, 50e6, 50e6) }
+func BenchmarkMul_100Mb(b *testing.B) { benchmarkMul(b, 100e6, 100e6) }

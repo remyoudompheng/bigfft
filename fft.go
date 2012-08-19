@@ -15,10 +15,21 @@ func (n nat) String() string {
 	return v.String()
 }
 
+// fftThreshold is the size (in bits) above which FFT is used over
+// Karatsuba from math/big
+var fftThreshold = int(250e3)
+
 // Mul sets z to the product x*y and returns z.
 // It can be used instead of the Int.Mul method of
 // math/big.
 func Mul(x, y *Int) *Int {
+	if x.BitLen() > fftThreshold && y.BitLen() > fftThreshold {
+		return mulFFT(x, y)
+	}
+	return new(Int).Mul(x, y)
+}
+
+func mulFFT(x, y *Int) *Int {
 	var xb, yb nat = x.Bits(), y.Bits()
 	zb := fftmul(xb, yb)
 	z := new(Int)
