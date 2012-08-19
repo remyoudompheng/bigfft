@@ -13,6 +13,32 @@ type fermat nat
 
 func (n fermat) String() string { return nat(n).String() }
 
+func (z fermat) norm() {
+	n := len(z) - 1
+	c := z[n]
+	if c == 0 {
+		return
+	}
+	if z[0] >= c {
+		z[n] = 0
+		z[0] -= c
+		return
+	}
+	// z[0] < z[n].
+	subVW(z, z, c) // Substract c
+	if c > 1 {
+		z[n] -= c - 1
+		c = 1
+	}
+	// Add back c.
+	if z[n] == 1 {
+		z[n] = 0
+		return
+	} else {
+		addVW(z, z, 1)
+	}
+}
+
 // Shift computes (x << k) mod (2^n+1).
 func (z fermat) Shift(x fermat, k int) {
 	if len(z) != len(x) {
@@ -30,28 +56,24 @@ func (z fermat) Shift(x fermat, k int) {
 		k -= n * _W
 		neg = true
 	}
+	kw, kb := k/_W, k%_W
 	// Shift left by kw words.
 	// x = a·2^(n-k) + b
 	// x<<k = (b<<k) - a
-	kw, kb := k/_W, k%_W
 	copy(z[kw:], x[:n-kw])
+	for i := 0; i < kw; i++ {
+		z[i] = 0
+	}
 	z[n] = 1 // Add (-1)
 	b := subVV(z[:kw+1], z[:kw+1], x[n-kw:])
 	subVW(z[kw+1:], z[kw+1:], b)
 	addVW(z, z, 1) // Add back 1.
 	// Shift left by kb bits
 	shlVU(z, z, uint(kb))
-	c := z[n]
-	if z[0] >= c {
-		z[n] = 0
-		z[0] -= c
-	} else {
-		z[n] = 1
-		subVW(z, z, c-1)
-	}
 	if neg {
 		z.Neg()
 	}
+	z.norm()
 }
 
 // Neg computes the opposite of x mod 2^n+1.
@@ -64,27 +86,18 @@ func (x fermat) Neg() {
 	}
 	x[n] = 0
 	c = addVW(x[:n], x[:n], c+2)
-	if x[0] >= c {
-		x[0] -= c
-	} else {
-		x[n] = 1
-		subVW(x, x, c-1)
-	}
+	x[n] = c
+	x.norm()
 	return
 }
 
 // Add computes addition mod 2^n+1.
 func (z fermat) Add(x, y fermat) fermat {
-	z = x
-	addVV(z, x, y) // there cannot be a carry here.
-	c := z[len(z)-1]
-	if z[0] >= c {
-		z[len(z)-1] = 0
-		z[0] -= c
-	} else {
-		z[len(z)-1] = 1
-		subVW(z, z, c-1)
+	if len(z) != len(x) {
+		panic("Add: len(z) != len(x)")
 	}
+	addVV(z, x, y) // there cannot be a carry here.
+	z.norm()
 	return z
 }
 

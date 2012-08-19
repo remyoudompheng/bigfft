@@ -2,12 +2,13 @@ package bigfft
 
 import (
 	"fmt"
-	"math/big"
+	. "math/big"
+	"math/rand"
 	"testing"
 )
 
 func parseHex(s string) fermat {
-	z := new(big.Int)
+	z := new(Int)
 	z, ok := z.SetString(s, 0)
 	if !ok {
 		panic(s)
@@ -16,27 +17,30 @@ func parseHex(s string) fermat {
 }
 
 func compare(t *testing.T, a, b fermat) error {
-	var x, y big.Int
+	var x, y Int
 	x.SetBits(a)
 	y.SetBits(b)
 	if x.Cmp(&y) != 0 {
-		return fmt.Errorf("%x != %x (%x)", &x, &y, new(big.Int).Xor(&x, &y))
+		return fmt.Errorf("%x != %x (%x)", &x, &y, new(Int).Xor(&x, &y))
 	}
 	return nil
 }
 
 func TestFermatShift(t *testing.T) {
-	f1 := parseHex("0x01223344556677889001223344556778")
-	n := len(f1) - 1
-	b := big.NewInt(1)
+	const n = 4
+	f := make(fermat, n+1)
+	for i := 0; i < n; i++ {
+		f[i] = Word(rand.Int63())
+	}
+	b := NewInt(1)
 	b = b.Lsh(b, uint(n*_W))
-	b = b.Add(b, big.NewInt(1))
+	b = b.Add(b, NewInt(1))
+	z := make(fermat, len(f)) // Test with uninitialized z.
 	for shift := -2048; shift < 2048; shift++ {
-		z := make(fermat, len(f1))
-		z.Shift(f1, shift)
+		z.Shift(f, shift)
 
-		z2 := new(big.Int)
-		z2.SetBits(f1)
+		z2 := new(Int)
+		z2.SetBits(f)
 		if shift < 0 {
 			s2 := (-shift) % (2 * n * _W)
 			z2 = z2.Lsh(z2, uint(2*n*_W-s2))
@@ -47,6 +51,26 @@ func TestFermatShift(t *testing.T) {
 		if err := compare(t, z, z2.Bits()); err != nil {
 			t.Errorf("error in shift by %d: %s", shift, err)
 		}
+	}
+}
+
+func TestFermatNeg(t *testing.T) {
+	const n = 4
+	b := NewInt(1)
+	b = b.Lsh(b, uint(n*_W))
+	b = b.Add(b, NewInt(1))
+	z := make(fermat, n+1)
+	for i := 0; i < n; i++ {
+		z[i] = Word(rand.Int63())
+	}
+
+	neg1 := new(Int)
+	neg1.SetBits(z)
+	neg1 = new(Int).Sub(b, neg1)
+	z.Neg()
+
+	if err := compare(t, neg1.Bits(), z); err != nil {
+		t.Errorf("error in neg")
 	}
 }
 
