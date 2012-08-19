@@ -259,7 +259,7 @@ func (v *polValues) InvTransform() poly {
 // element is src[i << idxShift]).
 func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 	var rec func(dst, src []fermat, size uint)
-	u, v := make(fermat, n+1), make(fermat, n+1) // pre-allocate temporary variables.
+	tmp := make(fermat, n+1) // pre-allocate temporary variables.
 	rec = func(dst, src []fermat, size uint) {
 		idxShift := k - size
 		ωshift := (2 * n * _W) >> size
@@ -298,10 +298,9 @@ func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 		// dst[i + 1<<(k-1)] is dst1[i] + ω^(i+K/2) * dst2[i]
 		//
 		for i := range dst1 {
-			copy(u, dst1[i])
-			v.Shift(dst2[i], i*ωshift) // ω^i * dst2[i]
-			dst1[i].Add(u, v)
-			dst2[i].Sub(u, v)
+			tmp.Shift(dst2[i], i*ωshift) // ω^i * dst2[i]
+			dst2[i].Sub(dst1[i], tmp)
+			dst1[i].Add(dst1[i], tmp)
 		}
 	}
 	rec(dst, src, k)
