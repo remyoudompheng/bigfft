@@ -112,6 +112,25 @@ func (z fermat) Add(x, y fermat) fermat {
 	return z
 }
 
+// Sub computes substraction mod 2^n+1.
+func (z fermat) Sub(x, y fermat) fermat {
+	if len(z) != len(x) {
+		panic("Add: len(z) != len(x)")
+	}
+	n := len(y) - 1
+	b := subVV(z[:n], x[:n], y[:n])
+	b += y[n]
+	// If b > 0, we need to subtract b<<n, which is the same as adding b.
+	z[n] = x[n]
+	if z[0] <= ^big.Word(0)-b {
+		z[0] += b
+	} else {
+		addVW(z, z, b)
+	}
+	z.norm()
+	return z
+}
+
 func (z fermat) Mul(x, y fermat) fermat {
 	var xi, yi, zi big.Int
 	xi.SetBits(x)

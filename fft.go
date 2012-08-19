@@ -303,8 +303,7 @@ func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 			copy(u, dst1[i])
 			v.Shift(dst2[i], i*ωshift) // ω^i * dst2[i]
 			dst1[i].Add(u, v)
-			v.Neg()
-			dst2[i].Add(u, v)
+			dst2[i].Sub(u, v)
 		}
 	}
 	rec(dst, src, k)
