@@ -9,6 +9,12 @@ const _W = int(unsafe.Sizeof(Word(0)) * 8)
 
 type nat []Word
 
+func (n nat) String() string {
+	v := new(Int)
+	v.SetBits(n)
+	return v.String()
+}
+
 // returns the FFT length k, m the number of words per chunk
 func fftSize(x, y nat) (k uint, m int) {
 	words := len(x) + len(y)
@@ -57,16 +63,21 @@ func polyFromNat(x nat, k uint, m int) poly {
 
 // Int evaluates back a poly to its integer value.
 func (p *poly) Int() nat {
-	n := make(nat, len(p.a)*p.m+1)
+	length := len(p.a)*p.m + 1
+	if na := len(p.a); na > 0 {
+		length += len(p.a[na-1])
+	}
+	n := make(nat, length)
 	m := p.m
 	np := n
 	for i := range p.a {
-		c := addVV(np[:m], np[:m], p.a[i])
+		l := len(p.a[i])
+		c := addVV(np[:l], np[:l], p.a[i])
+		np[l] += c
 		np = np[m:]
 		if np[0] > 1 {
 			panic("impossible")
 		}
-		np[0] += c
 	}
 	n = trim(n)
 	return n

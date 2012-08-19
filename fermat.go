@@ -11,6 +11,8 @@ import (
 // 0-1 last word constraint.
 type fermat nat
 
+func (n fermat) String() string { return nat(n).String() }
+
 // Shift computes (x << k) mod (2^n+1).
 func (z fermat) Shift(x fermat, k int) {
 	if len(z) != len(x) {
@@ -18,10 +20,20 @@ func (z fermat) Shift(x fermat, k int) {
 		panic("len(z) != len(x) in Shift")
 	}
 	n := len(x) - 1
-	kw, kb := k/_W, k%_W
+	// Shift by n*_W is Neg.
+	k %= 2 * n * _W
+	if k < 0 {
+		k += 2 * n * _W
+	}
+	neg := false
+	if k >= n*_W {
+		k -= n * _W
+		neg = true
+	}
 	// Shift left by kw words.
 	// x = a·2^(n-k) + b
 	// x<<k = (b<<k) - a
+	kw, kb := k/_W, k%_W
 	copy(z[kw:], x[:n-kw])
 	z[n] = 1 // Add (-1)
 	b := subVV(z[:kw+1], z[:kw+1], x[n-kw:])
@@ -36,6 +48,9 @@ func (z fermat) Shift(x fermat, k int) {
 	} else {
 		z[n] = 1
 		subVW(z, z, c-1)
+	}
+	if neg {
+		z.Neg()
 	}
 }
 
