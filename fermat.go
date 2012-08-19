@@ -1,7 +1,7 @@
 package bigfft
 
 import (
-	. "math/big"
+	"math/big"
 )
 
 // Arithmetic modulo 2^n+1.
@@ -71,7 +71,7 @@ func (z fermat) Shift(x fermat, k int) {
 	} else {
 		subVW(z[kw+1:], z[kw+1:], b)
 	}
-	if z[0] < ^Word(0) {
+	if z[0] < ^big.Word(0) {
 		z[0]++
 	} else {
 		addVW(z, z, 1) // Add back 1.
@@ -93,7 +93,7 @@ func (x fermat) Neg() {
 		x[i] = ^a
 	}
 	x[n] = 0
-	if x[0] <= ^Word(0)-(c+2) {
+	if x[0] <= ^big.Word(0)-(c+2) {
 		x[0] += c + 2
 	} else {
 		x[n] = addVW(x[:n], x[:n], c+2)
@@ -113,7 +113,7 @@ func (z fermat) Add(x, y fermat) fermat {
 }
 
 func (z fermat) Mul(x, y fermat) fermat {
-	var xi, yi, zi Int
+	var xi, yi, zi big.Int
 	xi.SetBits(x)
 	yi.SetBits(y)
 	zi.SetBits(z)

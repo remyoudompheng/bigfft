@@ -1,16 +1,16 @@
 package bigfft
 
 import (
-	. "math/big"
+	"math/big"
 	"unsafe"
 )
 
-const _W = int(unsafe.Sizeof(Word(0)) * 8)
+const _W = int(unsafe.Sizeof(big.Word(0)) * 8)
 
-type nat []Word
+type nat []big.Word
 
 func (n nat) String() string {
-	v := new(Int)
+	v := new(big.Int)
 	v.SetBits(n)
 	return v.String()
 }
@@ -20,19 +20,19 @@ func (n nat) String() string {
 var fftThreshold = int(250e3)
 
 // Mul sets z to the product x*y and returns z.
-// It can be used instead of the Int.Mul method of
-// math/big.
-func Mul(x, y *Int) *Int {
+// It can be used instead of the Mul method of
+// *big.Int from math/big package.
+func Mul(x, y *big.Int) *big.Int {
 	if x.BitLen() > fftThreshold && y.BitLen() > fftThreshold {
 		return mulFFT(x, y)
 	}
-	return new(Int).Mul(x, y)
+	return new(big.Int).Mul(x, y)
 }
 
-func mulFFT(x, y *Int) *Int {
+func mulFFT(x, y *big.Int) *big.Int {
 	var xb, yb nat = x.Bits(), y.Bits()
 	zb := fftmul(xb, yb)
-	z := new(Int)
+	z := new(big.Int)
 	z.SetBits(zb)
 	if x.Sign()*y.Sign() < 0 {
 		z.Neg(z)
@@ -134,7 +134,7 @@ func (p *poly) Int() nat {
 	for i := range p.a {
 		l := len(p.a[i])
 		c := addVV(np[:l], np[:l], p.a[i])
-		if np[l] < ^Word(0) {
+		if np[l] < ^big.Word(0) {
 			np[l] += c
 		} else {
 			addVW(np[l:], np[l:], c)
@@ -189,7 +189,7 @@ func (p *poly) Transform(n int) polValues {
 	// q(x) = a_0 + θa_1 x + ... + θ^(K-1) a_{K-1} x^(K-1)
 	//
 	// Twist p by θ to obtain q.
-	tbits := make([]Word, (n+1)<<k)
+	tbits := make([]big.Word, (n+1)<<k)
 	twisted := make([]fermat, 1<<k)
 	src := make(fermat, n+1)
 	for i := range twisted {
@@ -204,7 +204,7 @@ func (p *poly) Transform(n int) polValues {
 	}
 
 	// Now computed q(ω^i) for i = 0 ... K-1
-	valbits := make([]Word, (n+1)<<k)
+	valbits := make([]big.Word, (n+1)<<k)
 	values := make([]fermat, 1<<k)
 	for i := range values {
 		values[i] = fermat(valbits[i*(n+1) : (i+1)*(n+1)])
@@ -222,7 +222,7 @@ func (v *polValues) InvTransform() poly {
 	θshift := (n * _W) >> k
 
 	// Perform an inverse Fourier transform to recover q.
-	qbits := make([]Word, (n+1)<<k)
+	qbits := make([]big.Word, (n+1)<<k)
 	q := make([]fermat, 1<<k)
 	for i := range q {
 		q[i] = fermat(qbits[i*(n+1) : (i+1)*(n+1)])
@@ -305,7 +305,7 @@ func (p *polValues) Mul(q *polValues) (r polValues) {
 	n := p.n
 	r.k, r.n = p.k, p.n
 	r.values = make([]fermat, len(p.values))
-	bits := make([]Word, len(p.values)*(n+1))
+	bits := make([]big.Word, len(p.values)*(n+1))
 	buf := make(fermat, 8*n)
 	for i := range r.values {
 		r.values[i] = bits[i*(n+1) : (i+1)*(n+1)]
