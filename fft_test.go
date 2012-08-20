@@ -267,6 +267,7 @@ func benchmarkMul(b *testing.B, sizex, sizey int) {
 
 func BenchmarkMul_1kb(b *testing.B)   { benchmarkMul(b, 1e3, 1e3) }
 func BenchmarkMul_10kb(b *testing.B)  { benchmarkMul(b, 1e4, 1e4) }
+func BenchmarkMul_50kb(b *testing.B)  { benchmarkMul(b, 5e4, 5e4) }
 func BenchmarkMul_100kb(b *testing.B) { benchmarkMul(b, 1e5, 1e5) }
 func BenchmarkMul_1Mb(b *testing.B)   { benchmarkMul(b, 1e6, 1e6) }
 func BenchmarkMul_5Mb(b *testing.B)   { benchmarkMul(b, 5e6, 5e6) }
