@@ -81,16 +81,22 @@ func fftSize(x, y nat) (k uint, m int) {
 			break
 		}
 	}
+	// The 1<<k chunks of m words must have N bits so that
+	// 2^N-1 is larger than x*y. That is, m<<k > words
 	m = words>>k + 1
 	return
 }
 
-func valueSize(k uint, m int) int {
+// valueSize returns the smallest multiple of 1<<k greater than
+// 2*m*_W + k, that is also a multiple of _W. If extra > 0, the
+// returned value is only required to be a multiple of 1<<(k-extra)
+func valueSize(k uint, m int, extra uint) int {
 	n := 2*m*_W + int(k)
-	if k < 6 {
-		k = 6 // division by _W must not round down
+	K := 1 << (k - extra)
+	if K < _W {
+		K = _W
 	}
-	n = ((n >> k) + 1) << k
+	n = ((n / K) + 1) * K
 	return n / _W
 }
 
@@ -154,10 +160,12 @@ func trim(n nat) nat {
 	return nil
 }
 
-// Mul multiplies p and q modulo X^K+1, where K = 1<<p.k.
+// Mul multiplies p and q modulo X^K-1, where K = 1<<p.k.
 // The product is done via a Fourier transform.
 func (p *poly) Mul(q *poly) poly {
-	n := valueSize(p.k, p.m)
+	// extra=1 because there are easy K-th roots of unity modulo 2^n+1
+	// when n is a multiple of K/2.
+	n := valueSize(p.k, p.m, 1)
 
 	pv, qv := p.Transform(n), q.Transform(n)
 	rv := pv.Mul(&qv)
@@ -174,10 +182,53 @@ type polValues struct {
 	values []fermat // a slice of K (n+1)-word values
 }
 
-// Transform evaluates p at θω^i for i = 0...K-1, where
+// Transform evaluates p at θ^i for i = 0...K-1, where
+// θ is a K-th primitive root of unity in Z/(b^n+1)Z.
+func (p *poly) Transform(n int) polValues {
+	k := p.k
+	inputbits := make([]big.Word, (n+1)<<k)
+	input := make([]fermat, 1<<k)
+	// Now computed q(ω^i) for i = 0 ... K-1
+	valbits := make([]big.Word, (n+1)<<k)
+	values := make([]fermat, 1<<k)
+	for i := range values {
+		input[i] = inputbits[i*(n+1) : (i+1)*(n+1)]
+		if i < len(p.a) {
+			copy(input[i], p.a[i])
+		}
+		values[i] = fermat(valbits[i*(n+1) : (i+1)*(n+1)])
+	}
+	fourier(values, input, false, n, k)
+	return polValues{k, n, values}
+}
+
+// InvTransform reconstructs p (modulo X^K - 1) from its
+// values at θ^i for i = 0..K-1.
+func (v *polValues) InvTransform() poly {
+	k, n := v.k, v.n
+
+	// Perform an inverse Fourier transform to recover p.
+	pbits := make([]big.Word, (n+1)<<k)
+	p := make([]fermat, 1<<k)
+	for i := range p {
+		p[i] = fermat(pbits[i*(n+1) : (i+1)*(n+1)])
+	}
+	fourier(p, v.values, true, n, k)
+	// Divide by K, and untwist q to recover p.
+	u := make(fermat, n+1)
+	a := make([]nat, 1<<k)
+	for i := range p {
+		u.Shift(p[i], -int(k))
+		copy(p[i], u)
+		a[i] = nat(p[i])
+	}
+	return poly{k: k, m: 0, a: a}
+}
+
+// NTransform evaluates p at θω^i for i = 0...K-1, where
 // θ is a (2K)-th primitive root of unity in Z/(b^n+1)Z
 // and ω = θ².
-func (p *poly) Transform(n int) polValues {
+func (p *poly) NTransform(n int) polValues {
 	k := p.k
 	if len(p.a) >= 1<<k {
 		panic("Transform: len(p.a) >= 1<<k")
@@ -216,7 +267,7 @@ func (p *poly) Transform(n int) polValues {
 // InvTransform reconstructs a polynomial from its values at
 // roots of x^K+1. The m field of the returned polynomial
 // is unspecified.
-func (v *polValues) InvTransform() poly {
+func (v *polValues) InvNTransform() poly {
 	k := v.k
 	n := v.n
 	θshift := (n * _W) >> k

@@ -54,13 +54,32 @@ func TestRoundTripIntPoly(t *testing.T) {
 }
 
 func TestFourierSizes(t *testing.T) {
-	sizes := []int{1e3, 2e3, 5e3, 10e3, 20e3, 100e3,
-		1e6, 2e6, 5e6, 10e6, 20e6, 50e6, 100e6}
+	sizes := []int{
+		2e3, 3e3, 5e3, 7e3, 10e3, 14e3,
+		2e4, 3e4, 5e4, 7e4, 10e4, 14e4,
+		2e5, 3e5, 5e5, 7e5, 10e5, 14e5,
+		2e6, 3e6, 5e6, 7e6, 10e6, 14e6,
+		2e7, 3e7, 5e7, 7e7, 10e7, 14e7,
+	}
 	for _, s := range sizes {
 		k, m := fftSize(make(nat, s/_W), make(nat, s/_W))
-		v := valueSize(k, m)
+		v := valueSize(k, m, 1)
 		t.Logf("bits=%d => FFT size %d, chunk size = %d, value size = %d",
 			s, 1<<k, m, v)
+		needed := 2*m*_W + int(k)
+		got := v * _W
+		t.Logf("inefficiency: value/chunk_product=%.2f, fftsize/inputsize=%.2f",
+			float64(got)/float64(needed), float64(v<<k)/float64(2*s/_W))
+		{
+			v2 := valueSize(k, m, 2)
+			if v2 < v {
+				// apply sqrt(2) trick.
+				needed := 2*m*_W + int(k)
+				got := v2 * _W
+				t.Logf("sqrt(2) trick: value size %d, value/chunk_product=%.2f, fftsize/inputsize=%.2f",
+					v2, float64(got)/float64(needed), float64(v2<<k)/float64(2*s/_W))
+			}
+		}
 		if v > 3*m {
 			t.Errorf("FFT word size %d >> input word size %d", v, m)
 		}
@@ -136,7 +155,7 @@ func TestRoundTripPolyValues(t *testing.T) {
 	pol := polyFromNat(n, k, m)
 
 	// Transform it.
-	f := valueSize(k, m)
+	f := valueSize(k, m, 1)
 	values := pol.Transform(f)
 
 	// Inverse transform.
