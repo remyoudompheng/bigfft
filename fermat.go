@@ -141,21 +141,27 @@ func (z fermat) Sub(x, y fermat) fermat {
 }
 
 func (z fermat) Mul(x, y fermat) fermat {
-	var xi, yi, zi big.Int
-	xi.SetBits(x)
-	yi.SetBits(y)
-	zi.SetBits(z)
-	zb := zi.Mul(&xi, &yi).Bits()
 	n := len(x) - 1
-	if len(zb) <= n {
-		// Short product.
-		copy(z, zb)
-		for i := len(zb); i < len(z); i++ {
-			z[i] = 0
+	if n < 30 {
+		z = z[:2*n+2]
+		basicMul(z, x, y)
+		z = z[:2*n+1]
+	} else {
+		var xi, yi, zi big.Int
+		xi.SetBits(x)
+		yi.SetBits(y)
+		zi.SetBits(z)
+		zb := zi.Mul(&xi, &yi).Bits()
+		if len(zb) <= n {
+			// Short product.
+			copy(z, zb)
+			for i := len(zb); i < len(z); i++ {
+				z[i] = 0
+			}
+			return z
 		}
-		return z
+		z = zb
 	}
-	z = zb
 	// len(z) is at most 2n+1.
 	if len(z) > 2*n+1 {
 		panic("len(z) > 2n+1")
@@ -173,4 +179,20 @@ func (z fermat) Mul(x, y fermat) fermat {
 	}
 	z.norm()
 	return z
+}
+
+// copied from math/big
+//
+// basicMul multiplies x and y and leaves the result in z.
+// The (non-normalized) result is placed in z[0 : len(x) + len(y)].
+func basicMul(z, x, y fermat) {
+	// initialize z
+	for i := 0; i < len(z); i++ {
+		z[i] = 0
+	}
+	for i, d := range y {
+		if d != 0 {
+			z[len(x)+i] = addMulVVW(z[i:i+len(x)], x, d)
+		}
+	}
 }
