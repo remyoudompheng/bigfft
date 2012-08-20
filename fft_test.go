@@ -60,6 +60,7 @@ func TestFourierSizes(t *testing.T) {
 		2e5, 3e5, 5e5, 7e5, 10e5, 14e5,
 		2e6, 3e6, 5e6, 7e6, 10e6, 14e6,
 		2e7, 3e7, 5e7, 7e7, 10e7, 14e7,
+		2e8, 3e8, 5e8, 7e8, 10e8, 14e8,
 	}
 	for _, s := range sizes {
 		k, m := fftSize(make(nat, s/_W), make(nat, s/_W))

@@ -64,8 +64,8 @@ func fftmul(x, y nat) nat {
 // fft size i.
 var fftSizeThreshold = [...]int64{0, 0, 0,
 	4 << 10, 8 << 10, 16 << 10, // 5 
-	32 << 10, 64 << 10, 1 << 18, 1 << 20, 1 << 22, // 10
-	1 << 24, 1 << 26, 1 << 28, 1 << 30,
+	32 << 10, 64 << 10, 1 << 18, 1 << 20, 3 << 20, // 10
+	16 << 20, 50 << 20, 160 << 20, 500 << 20, 2 << 30,
 }
 
 // returns the FFT length k, m the number of words per chunk
