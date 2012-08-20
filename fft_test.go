@@ -241,6 +241,7 @@ func benchmarkMulFFT(b *testing.B, sizex, sizey int) {
 
 func BenchmarkMulBig_1kb(b *testing.B)   { benchmarkMulBig(b, 1e3, 1e3) }
 func BenchmarkMulBig_10kb(b *testing.B)  { benchmarkMulBig(b, 1e4, 1e4) }
+func BenchmarkMulBig_50kb(b *testing.B)  { benchmarkMulBig(b, 5e4, 5e4) }
 func BenchmarkMulBig_100kb(b *testing.B) { benchmarkMulBig(b, 1e5, 1e5) }
 func BenchmarkMulBig_1Mb(b *testing.B)   { benchmarkMulBig(b, 1e6, 1e6) }
 func BenchmarkMulBig_5Mb(b *testing.B)   { benchmarkMulBig(b, 5e6, 5e6) }
@@ -250,10 +251,11 @@ func BenchmarkMulBig_20Mb(b *testing.B)  { benchmarkMulBig(b, 20e6, 20e6) }
 // 50Mb multiplication takes about 1 minute.
 //func BenchmarkMulBig_50Mb(b *testing.B)  { benchmarkMulBig(b, 50e6, 50e6) }
 
-func BenchmarkMulFFT_1kb(b *testing.B)   { benchmarkMulFFT(b, 1e3, 1e3) }
-func BenchmarkMulFFT_10kb(b *testing.B)  { benchmarkMulFFT(b, 1e4, 1e4) }
-func BenchmarkMulFFT_100kb(b *testing.B) { benchmarkMulFFT(b, 1e5, 1e5) }
+func BenchmarkMulFFT_1kb(b *testing.B)  { benchmarkMulFFT(b, 1e3, 1e3) }
+func BenchmarkMulFFT_10kb(b *testing.B) { benchmarkMulFFT(b, 1e4, 1e4) }
+func BenchmarkMulFFT_50kb(b *testing.B) { benchmarkMulFFT(b, 5e4, 5e4) }
 
+func BenchmarkMulFFT_100kb(b *testing.B) { benchmarkMulFFT(b, 1e5, 1e5) }
 func BenchmarkMulFFT_1Mb(b *testing.B)   { benchmarkMulFFT(b, 1e6, 1e6) }
 func BenchmarkMulFFT_5Mb(b *testing.B)   { benchmarkMulFFT(b, 5e6, 5e6) }
 func BenchmarkMulFFT_10Mb(b *testing.B)  { benchmarkMulFFT(b, 10e6, 10e6) }

@@ -3,6 +3,7 @@
 # and converted to the go test output format.
 BenchmarkMul_1kb        18460846	       536 ns/op
 BenchmarkMul_10kb	  374920	     26669 ns/op
+BenchmarkMul_50kb	   38936	    252270 ns/op
 BenchmarkMul_100kb	   14505	    686813 ns/op
 BenchmarkMul_1Mb	     836	  12100000 ns/op
 BenchmarkMul_5Mb	      88	 111731843 ns/op
