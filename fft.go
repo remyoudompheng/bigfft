@@ -22,9 +22,9 @@ func (n nat) String() string {
 // fftThreshold is the size (in words) above which FFT is used over
 // Karatsuba from math/big.
 //
-// TestCalibrate seems to indicate a threshold of 100kbits on 32-bit
-// arches and 150kbits on 64-bit arches.
-var fftThreshold = 3000
+// TestCalibrate seems to indicate a threshold of 60kbits on 32-bit
+// arches and 110kbits on 64-bit arches.
+var fftThreshold = 1800
 
 // Mul computes the product x*y and returns z.
 // It can be used instead of the Mul method of
@@ -60,36 +60,26 @@ func fftmul(x, y nat) nat {
 	return rp.Int()
 }
 
+// fftSizeThreshold[i] is the maximal size (in bits) where we should use
+// fft size i.
+var fftSizeThreshold = [...]int64{0, 0, 0,
+	4 << 10, 8 << 10, 16 << 10, // 5 
+	32 << 10, 64 << 10, 1 << 18, 1 << 20, 1 << 22, // 10
+	1 << 24, 1 << 26, 1 << 28, 1 << 30,
+}
+
 // returns the FFT length k, m the number of words per chunk
 // such that m << k is larger than the number of words
 // in x*y.
 func fftSize(x, y nat) (k uint, m int) {
 	words := len(x) + len(y)
 	bits := int64(words) * int64(_W)
-	switch {
-	case bits < 1<<12: // Irrelevant number of bits (under fftThreshold).
-		k = 4
-	case bits < 1<<14:
-		k = 6
-	case bits < 1<<16:
-		k = 7
-
-	case bits < 1<<18: // See TestFourierSizes to check that numbers make sense.
-		k = 8
-	case bits < 1<<20:
-		k = 9
-	case bits < 1<<22:
-		k = 10
-	case bits < 1<<24:
-		k = 11
-	case bits < 1<<26:
-		k = 12
-	case bits < 1<<28:
-		k = 13
-	case bits < 1<<30:
-		k = 14
-	default:
-		k = 15
+	k = uint(len(fftSizeThreshold))
+	for i := range fftSizeThreshold {
+		if fftSizeThreshold[i] > bits {
+			k = uint(i)
+			break
+		}
 	}
 	m = words>>k + 1
 	return

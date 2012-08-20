@@ -1,9 +1,11 @@
-BenchmarkMul_1kb	   10000	    103926 ns/op
-BenchmarkMul_10kb	    5000	    668617 ns/op
-BenchmarkMul_100kb	     500	   3152558 ns/op
-BenchmarkMul_1Mb	      50	  33482500 ns/op
-BenchmarkMul_5Mb	      10	 219294000 ns/op
-BenchmarkMul_10Mb	       5	 579079000 ns/op
-BenchmarkMul_20Mb	       1	1225503000 ns/op
-BenchmarkMul_50Mb	       1	3220295000 ns/op
-BenchmarkMul_100Mb	       1	8605237000 ns/op
+# Benchmarks using the mulFFT function only.
+BenchmarkMul_1kb	   50000	     31247 ns/op
+BenchmarkMul_10kb	    5000	    311773 ns/op
+BenchmarkMul_100kb	    1000	   2745436 ns/op
+BenchmarkMul_1Mb	      50	  29235680 ns/op
+BenchmarkMul_5Mb	      10	 198136700 ns/op
+BenchmarkMul_10Mb	       5	 522288600 ns/op
+BenchmarkMul_20Mb	       1	1125621000 ns/op
+BenchmarkMul_50Mb	       1	2942162000 ns/op
+BenchmarkMul_100Mb	       1	8000678000 ns/op
+
