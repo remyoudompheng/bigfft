@@ -65,7 +65,7 @@ func fftmul(x, y nat) nat {
 var fftSizeThreshold = [...]int64{0, 0, 0,
 	4 << 10, 8 << 10, 16 << 10, // 5 
 	32 << 10, 64 << 10, 1 << 18, 1 << 20, 3 << 20, // 10
-	16 << 20, 50 << 20, 160 << 20, 500 << 20, 2 << 30,
+	8 << 20, 30 << 20, 100 << 20, 300 << 20, 600 << 20,
 }
 
 // returns the FFT length k, m the number of words per chunk
@@ -163,9 +163,10 @@ func trim(n nat) nat {
 // Mul multiplies p and q modulo X^K-1, where K = 1<<p.k.
 // The product is done via a Fourier transform.
 func (p *poly) Mul(q *poly) poly {
-	// extra=1 because there are easy K-th roots of unity modulo 2^n+1
-	// when n is a multiple of K/2.
-	n := valueSize(p.k, p.m, 1)
+	// extra=2 because:
+	// * some power of 2 is a K-th root of unity when n is a multiple of K/2.
+	// * 2 itself is a square (see fermat.ShiftHalf)
+	n := valueSize(p.k, p.m, 2)
 
 	pv, qv := p.Transform(n), q.Transform(n)
 	rv := pv.Mul(&qv)
@@ -294,18 +295,20 @@ func (v *polValues) InvNTransform() poly {
 // fourier performs an unnormalized Fourier transform
 // of src, a length 1<<k vector of numbers modulo b^n+1
 // where b = 1<<_W.
-//
-// The root of unity used in the transform is ω=1<<ωshift.
-// The source array may use shifted indices (i.e. the i-th
-// element is src[i << idxShift]).
 func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 	var rec func(dst, src []fermat, size uint)
-	tmp := make(fermat, n+1) // pre-allocate temporary variables.
+	tmp := make(fermat, n+1)  // pre-allocate temporary variables.
+	tmp2 := make(fermat, n+1) // pre-allocate temporary variables.
+
+	// The recursion function of the FFT.
+	// The root of unity used in the transform is ω=1<<(ω2shift/2).
+	// The source array may use shifted indices (i.e. the i-th
+	// element is src[i << idxShift]).
 	rec = func(dst, src []fermat, size uint) {
 		idxShift := k - size
-		ωshift := (2 * n * _W) >> size
+		ω2shift := (4 * n * _W) >> size
 		if backward {
-			ωshift = -ωshift
+			ω2shift = -ω2shift
 		}
 
 		// Easy cases.
@@ -339,7 +342,7 @@ func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
 		// dst[i + 1<<(k-1)] is dst1[i] + ω^(i+K/2) * dst2[i]
 		//
 		for i := range dst1 {
-			tmp.Shift(dst2[i], i*ωshift) // ω^i * dst2[i]
+			tmp.ShiftHalf(dst2[i], i*ω2shift, tmp2) // ω^i * dst2[i]
 			dst2[i].Sub(dst1[i], tmp)
 			dst1[i].Add(dst1[i], tmp)
 		}

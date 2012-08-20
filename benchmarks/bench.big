@@ -1,5 +1,6 @@
 BenchmarkMul_1kb	 1000000	      1599 ns/op
 BenchmarkMul_10kb	   50000	     61533 ns/op
+BenchmarkMul_50kb	    2000	    833693 ns/op
 BenchmarkMul_100kb	    1000	   2567995 ns/op
 BenchmarkMul_1Mb	      20	 105237800 ns/op
 BenchmarkMul_5Mb	       1	1272947000 ns/op

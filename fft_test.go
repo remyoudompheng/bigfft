@@ -64,23 +64,13 @@ func TestFourierSizes(t *testing.T) {
 	}
 	for _, s := range sizes {
 		k, m := fftSize(make(nat, s/_W), make(nat, s/_W))
-		v := valueSize(k, m, 1)
+		v := valueSize(k, m, 2)
 		t.Logf("bits=%d => FFT size %d, chunk size = %d, value size = %d",
 			s, 1<<k, m, v)
 		needed := 2*m*_W + int(k)
 		got := v * _W
 		t.Logf("inefficiency: value/chunk_product=%.2f, fftsize/inputsize=%.2f",
 			float64(got)/float64(needed), float64(v<<k)/float64(2*s/_W))
-		{
-			v2 := valueSize(k, m, 2)
-			if v2 < v {
-				// apply sqrt(2) trick.
-				needed := 2*m*_W + int(k)
-				got := v2 * _W
-				t.Logf("sqrt(2) trick: value size %d, value/chunk_product=%.2f, fftsize/inputsize=%.2f",
-					v2, float64(got)/float64(needed), float64(v2<<k)/float64(2*s/_W))
-			}
-		}
 		if v > 3*m {
 			t.Errorf("FFT word size %d >> input word size %d", v, m)
 		}

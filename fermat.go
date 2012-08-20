@@ -46,7 +46,7 @@ func (z fermat) Shift(x fermat, k int) {
 		panic("len(z) != len(x) in Shift")
 	}
 	n := len(x) - 1
-	// Shift by n*_W is Neg.
+	// Shift by n*_W is taking the opposite.
 	k %= 2 * n * _W
 	if k < 0 {
 		k += 2 * n * _W
@@ -92,6 +92,23 @@ func (z fermat) Shift(x fermat, k int) {
 	// Shift left by kb bits
 	shlVU(z, z, uint(kb))
 	z.norm()
+}
+
+// ShiftHalf shifts x by k/2 bits the left. Shifting by 1/2 bit
+// is multiplication by sqrt(2) mod 2^n+1 which is 2^(3n/4) - 2^(n/4).
+// A temporary buffer must be provided in tmp.
+func (z fermat) ShiftHalf(x fermat, k int, tmp fermat) {
+	n := len(z) - 1
+	if k%2 == 0 {
+		z.Shift(x, k/2)
+		return
+	}
+	u := (k - 1) / 2
+	a := u + (3*_W/4)*n
+	b := u + (_W/4)*n
+	z.Shift(x, a)
+	tmp.Shift(x, b)
+	z.Sub(z, tmp)
 }
 
 // Add computes addition mod 2^n+1.
