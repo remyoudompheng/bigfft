@@ -209,10 +209,10 @@ func benchmarkMulBig(b *testing.B, sizex, sizey int) {
 	mulx := rndNat(sizex / _W)
 	muly := rndNat(sizey / _W)
 	b.ResetTimer()
+	var x, y, z Int
+	x.SetBits(mulx)
+	y.SetBits(muly)
 	for i := 0; i < b.N; i++ {
-		var x, y, z Int
-		x.SetBits(mulx)
-		y.SetBits(muly)
 		z.Mul(&x, &y)
 	}
 }
@@ -221,10 +221,10 @@ func benchmarkMulFFT(b *testing.B, sizex, sizey int) {
 	mulx := rndNat(sizex / _W)
 	muly := rndNat(sizey / _W)
 	b.ResetTimer()
+	var x, y Int
+	x.SetBits(mulx)
+	y.SetBits(muly)
 	for i := 0; i < b.N; i++ {
-		var x, y Int
-		x.SetBits(mulx)
-		y.SetBits(muly)
 		_ = mulFFT(&x, &y)
 	}
 }
@@ -275,3 +275,25 @@ func BenchmarkMul_10Mb(b *testing.B)  { benchmarkMul(b, 10e6, 10e6) }
 func BenchmarkMul_20Mb(b *testing.B)  { benchmarkMul(b, 20e6, 20e6) }
 func BenchmarkMul_50Mb(b *testing.B)  { benchmarkMul(b, 50e6, 50e6) }
 func BenchmarkMul_100Mb(b *testing.B) { benchmarkMul(b, 100e6, 100e6) }
+
+// Unbalanced multiplication benchmarks
+func BenchmarkMul_1x5Mb(b *testing.B)  { benchmarkMul(b, 1e6, 5e6) }
+func BenchmarkMul_1x10Mb(b *testing.B) { benchmarkMul(b, 1e6, 10e6) }
+func BenchmarkMul_1x20Mb(b *testing.B) { benchmarkMul(b, 1e6, 20e6) }
+func BenchmarkMul_1x50Mb(b *testing.B) { benchmarkMul(b, 1e6, 50e6) }
+func BenchmarkMul_5x20Mb(b *testing.B) { benchmarkMul(b, 5e6, 20e6) }
+func BenchmarkMul_5x50Mb(b *testing.B) { benchmarkMul(b, 5e6, 50e6) }
+
+func BenchmarkMulBig_1x5Mb(b *testing.B)  { benchmarkMulBig(b, 1e6, 5e6) }
+func BenchmarkMulBig_1x10Mb(b *testing.B) { benchmarkMulBig(b, 1e6, 10e6) }
+func BenchmarkMulBig_1x20Mb(b *testing.B) { benchmarkMulBig(b, 1e6, 20e6) }
+func BenchmarkMulBig_1x50Mb(b *testing.B) { benchmarkMulBig(b, 1e6, 50e6) }
+func BenchmarkMulBig_5x20Mb(b *testing.B) { benchmarkMulBig(b, 5e6, 20e6) }
+func BenchmarkMulBig_5x50Mb(b *testing.B) { benchmarkMulBig(b, 5e6, 50e6) }
+
+func BenchmarkMulFFT_1x5Mb(b *testing.B)  { benchmarkMulFFT(b, 1e6, 5e6) }
+func BenchmarkMulFFT_1x10Mb(b *testing.B) { benchmarkMulFFT(b, 1e6, 10e6) }
+func BenchmarkMulFFT_1x20Mb(b *testing.B) { benchmarkMulFFT(b, 1e6, 20e6) }
+func BenchmarkMulFFT_1x50Mb(b *testing.B) { benchmarkMulFFT(b, 1e6, 50e6) }
+func BenchmarkMulFFT_5x20Mb(b *testing.B) { benchmarkMulFFT(b, 5e6, 20e6) }
+func BenchmarkMulFFT_5x50Mb(b *testing.B) { benchmarkMulFFT(b, 5e6, 50e6) }

@@ -11,3 +11,10 @@ BenchmarkMul_10Mb	      48         212314000 ns/op
 BenchmarkMul_20Mb	      21	 490196000 ns/op
 BenchmarkMul_50Mb	       8	1280000000 ns/op
 BenchmarkMul_100Mb	       4	2673000000 ns/op
+
+BenchmarkMul_1x5Mb        151          66225165 ns/op
+BenchmarkMul_1x10Mb       111          90909000 ns/op
+BenchmarkMul_1x20Mb        59         176678000 ns/op
+BenchmarkMul_1x50Mb        23         434782000 ns/op
+BenchmarkMul_5x20Mb        35         289855000 ns/op
+BenchmarkMul_5x50Mb        14         746269000 ns/op

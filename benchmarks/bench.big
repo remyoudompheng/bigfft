@@ -14,3 +14,11 @@ BenchmarkMul_20Mb	       1	11514488000 ns/op
 # time(100Mb) = 3*time(50Mb)
 BenchmarkMul_50Mb	       1        49199945000 ns/op
 BenchmarkMul_100Mb	       1	147599836000 ns/op
+
+BenchmarkMul_1x5Mb         20         507268000 ns/op
+BenchmarkMul_1x10Mb         1        1002801000 ns/op
+BenchmarkMul_1x20Mb         1        1988546000 ns/op
+BenchmarkMul_1x50Mb         1        4940572000 ns/op
+BenchmarkMul_5x20Mb         1        5011810000 ns/op
+BenchmarkMul_5x50Mb         1        12449508000 ns/op
+

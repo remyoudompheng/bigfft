@@ -93,7 +93,7 @@ var mulTests = []test{
 
 func TestFermatMul(t *testing.T) {
 	for _, item := range mulTests {
-		z := make(fermat, len(item.a))
+		z := make(fermat, 3*len(item.a))
 		z = z.Mul(item.a, item.b)
 		compare(t, z, item.c)
 	}
