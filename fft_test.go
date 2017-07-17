@@ -237,9 +237,8 @@ func BenchmarkMulBig_1Mb(b *testing.B)   { benchmarkMulBig(b, 1e6, 1e6) }
 func BenchmarkMulBig_5Mb(b *testing.B)   { benchmarkMulBig(b, 5e6, 5e6) }
 func BenchmarkMulBig_10Mb(b *testing.B)  { benchmarkMulBig(b, 10e6, 10e6) }
 func BenchmarkMulBig_20Mb(b *testing.B)  { benchmarkMulBig(b, 20e6, 20e6) }
-
-// 50Mb multiplication takes about 1 minute.
-//func BenchmarkMulBig_50Mb(b *testing.B)  { benchmarkMulBig(b, 50e6, 50e6) }
+func BenchmarkMulBig_50Mb(b *testing.B)  { benchmarkMulBig(b, 50e6, 50e6) }
+func BenchmarkMulBig_100Mb(b *testing.B) { benchmarkMulBig(b, 100e6, 100e6) }
 
 func BenchmarkMulFFT_1kb(b *testing.B)  { benchmarkMulFFT(b, 1e3, 1e3) }
 func BenchmarkMulFFT_10kb(b *testing.B) { benchmarkMulFFT(b, 1e4, 1e4) }

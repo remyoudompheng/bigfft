@@ -1,19 +1,20 @@
 # Benchmarks using the mulFFT function only.
-BenchmarkMul_1kb       100000             29659 ns/op
-BenchmarkMul_10kb       10000            292823 ns/op
-BenchmarkMul_50kb        1000           1673191 ns/op
-BenchmarkMul_100kb       1000           2609174 ns/op
-BenchmarkMul_1Mb           50          28511840 ns/op
-BenchmarkMul_5Mb           10         168610100 ns/op
-BenchmarkMul_10Mb           5         403888600 ns/op
-BenchmarkMul_20Mb           5         849141200 ns/op
-BenchmarkMul_50Mb           1        2922353000 ns/op
-BenchmarkMul_100Mb          1        5970592000 ns/op
+# Run on a Core i5-4590 (Go 1.8)
+BenchmarkMul_1kb      	  200000	      9737 ns/op
+BenchmarkMul_10kb     	   10000	    105408 ns/op
+BenchmarkMul_50kb     	    3000	    584090 ns/op
+BenchmarkMul_100kb    	    2000	    973130 ns/op
+BenchmarkMul_1Mb      	     200	   8622463 ns/op
+BenchmarkMul_5Mb      	      30	  48602728 ns/op
+BenchmarkMul_10Mb     	      10	 109184721 ns/op
+BenchmarkMul_20Mb     	       5	 227053895 ns/op
+BenchmarkMul_50Mb     	       2	 727421044 ns/op
+BenchmarkMul_100Mb    	       1	1550029484 ns/op
 
-BenchmarkMul_1x5Mb        100          99174500 ns/op
-BenchmarkMul_1x10Mb        10         207445000 ns/op
-BenchmarkMul_1x20Mb         5         463875000 ns/op
-BenchmarkMul_1x50Mb         1        1341762000 ns/op
-BenchmarkMul_5x20Mb         5         575246400 ns/op
-BenchmarkMul_5x50Mb         1        1326256000 ns/op
+BenchmarkMul_1x5Mb    	      50	  28827150 ns/op
+BenchmarkMul_1x10Mb   	      20	  58097775 ns/op
+BenchmarkMul_1x20Mb   	      10	 124998246 ns/op
+BenchmarkMul_1x50Mb   	       3	 350045770 ns/op
+BenchmarkMul_5x20Mb   	      10	 160220847 ns/op
+BenchmarkMul_5x50Mb   	       3	 350824154 ns/op
 
