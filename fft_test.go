@@ -78,26 +78,35 @@ func TestFourierSizes(t *testing.T) {
 }
 
 func testFourier(t *testing.T, N int, k uint) {
-	t.Logf("testFourier(t, %d, %d)", N, k)
-	ωshift := (2 * N * _W) >> k
+	// Random coefficients
 	src := make([]fermat, 1<<k)
-	dst1 := make([]fermat, 1<<k)
-	dst2 := make([]fermat, 1<<k)
-	// random inputs.
 	for i := range src {
 		src[i] = make(fermat, N+1)
+		for p := 0; p < N; p++ {
+			src[i][p] = Word(rnd.Int63())
+		}
+	}
+	cmpFourier(t, N, k, src)
+}
+
+// cmpFourier computes the Fourier transform of src
+// and compares it to the FFT result.
+func cmpFourier(t *testing.T, N int, k uint, src []fermat) {
+	t.Logf("testFourier(t, %d, %d)", N, k)
+	ωshift := (4 * N * _W) >> k
+	dst1 := make([]fermat, 1<<k)
+	dst2 := make([]fermat, 1<<k)
+	for i := range src {
 		dst1[i] = make(fermat, N+1)
 		dst2[i] = make(fermat, N+1)
-		for p := 0; p < N; p++ {
-			src[i][p] = Word(rand.Int63())
-		}
 	}
 
 	// naive transform
 	tmp := make(fermat, N+1)
+	tmp2 := make(fermat, N+1)
 	for i := range src {
 		for j := range dst1 {
-			tmp.Shift(src[i], i*j*ωshift)
+			tmp.ShiftHalf(src[i], i*j*ωshift, tmp2)
 			dst1[j].Add(dst1[j], tmp)
 		}
 	}
@@ -125,10 +134,23 @@ func TestFourier(t *testing.T) {
 	testFourier(t, 2, 2)
 	testFourier(t, 2, 3)
 	testFourier(t, 2, 4)
+	testFourier(t, 2, 8)
 
 	testFourier(t, 4, 4)
 	testFourier(t, 4, 5)
 	testFourier(t, 4, 6)
+	testFourier(t, 4, 8)
+
+	// Test a few limit cases. This is when
+	// N*WordSize is a multiple of 1<<(k-2) but not 1<<(k-1)
+	if _W == 64 {
+		testFourier(t, 1, 8)
+		testFourier(t, 3, 8)
+		testFourier(t, 5, 8)
+		testFourier(t, 7, 8)
+		testFourier(t, 9, 8)
+		testFourier(t, 11, 8)
+	}
 }
 
 // Tests Fourier transform and its reciprocal.
