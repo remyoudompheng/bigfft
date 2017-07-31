@@ -296,3 +296,15 @@ func BenchmarkMulFFT_1x20Mb(b *testing.B) { benchmarkMulFFT(b, 1e6, 20e6) }
 func BenchmarkMulFFT_1x50Mb(b *testing.B) { benchmarkMulFFT(b, 1e6, 50e6) }
 func BenchmarkMulFFT_5x20Mb(b *testing.B) { benchmarkMulFFT(b, 5e6, 20e6) }
 func BenchmarkMulFFT_5x50Mb(b *testing.B) { benchmarkMulFFT(b, 5e6, 50e6) }
+
+func TestIssue1(t *testing.T) {
+	e := NewInt(1)
+	e.SetBit(e, 132048, 1)
+	e.Sub(e, NewInt(4)) // e == 1<<132048 - 4
+	g := NewInt(0).Set(e)
+	e.Mul(e, e)
+	g = Mul(g, g)
+	if g.Cmp(e) != 0 {
+		t.Fatal("incorrect Mul result")
+	}
+}
