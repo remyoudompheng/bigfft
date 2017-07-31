@@ -84,7 +84,9 @@ func (z fermat) Shift(x fermat, k int) {
 		z[n] -= b
 	}
 	// Add back 1.
-	if z[0] < ^big.Word(0) {
+	if z[n] > 0 {
+		z[n]--
+	} else if z[0] < ^big.Word(0) {
 		z[0]++
 	} else {
 		addVW(z, z, 1)

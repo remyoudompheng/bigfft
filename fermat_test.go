@@ -3,7 +3,6 @@ package bigfft
 import (
 	"fmt"
 	. "math/big"
-	"math/rand"
 	"testing"
 )
 
@@ -30,7 +29,7 @@ func TestFermatShift(t *testing.T) {
 	const n = 4
 	f := make(fermat, n+1)
 	for i := 0; i < n; i++ {
-		f[i] = Word(rand.Int63())
+		f[i] = Word(rnd.Int63())
 	}
 	b := NewInt(1)
 	b = b.Lsh(b, uint(n*_W))
@@ -47,6 +46,33 @@ func TestFermatShift(t *testing.T) {
 		} else {
 			z2 = z2.Lsh(z2, uint(shift))
 		}
+		z2 = z2.Mod(z2, b)
+		if err := compare(t, z, z2.Bits()); err != nil {
+			t.Errorf("error in shift by %d: %s", shift, err)
+		}
+	}
+}
+
+func TestFermatShiftHalf(t *testing.T) {
+	const n = 3
+	f := make(fermat, n+1)
+	for i := 0; i < n; i++ {
+		f[i] = ^Word(0)
+	}
+	b := NewInt(1)
+	b = b.Lsh(b, uint(n*_W))
+	b = b.Add(b, NewInt(1))
+	z := make(fermat, len(f)) // Test with uninitialized z.
+	tmp := make(fermat, len(f))
+	tmp2 := make(fermat, len(f))
+	for shift := 0; shift < 16384; shift++ {
+		// Shift twice by shift/2
+		z.ShiftHalf(f, shift, tmp)
+		copy(tmp, z)
+		z.ShiftHalf(tmp, shift, tmp2)
+
+		z2 := new(Int)
+		z2 = z2.Lsh(new(Int).SetBits(f), uint(shift))
 		z2 = z2.Mod(z2, b)
 		if err := compare(t, z, z2.Bits()); err != nil {
 			t.Errorf("error in shift by %d: %s", shift, err)

@@ -87,6 +87,14 @@ func testFourier(t *testing.T, N int, k uint) {
 		}
 	}
 	cmpFourier(t, N, k, src)
+
+	// Saturated coefficients (b^N-1)
+	for i := range src {
+		for p := 0; p < N; p++ {
+			src[i][p] = ^Word(0)
+		}
+	}
+	cmpFourier(t, N, k, src)
 }
 
 // cmpFourier computes the Fourier transform of src
