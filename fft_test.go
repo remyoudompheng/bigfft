@@ -86,7 +86,8 @@ func testFourier(t *testing.T, N int, k uint) {
 			src[i][p] = Word(rnd.Int63())
 		}
 	}
-	cmpFourier(t, N, k, src)
+	cmpFourier(t, N, k, src, false)
+	cmpFourier(t, N, k, src, true)
 
 	// Saturated coefficients (b^N-1)
 	for i := range src {
@@ -94,14 +95,18 @@ func testFourier(t *testing.T, N int, k uint) {
 			src[i][p] = ^Word(0)
 		}
 	}
-	cmpFourier(t, N, k, src)
+	cmpFourier(t, N, k, src, false)
+	cmpFourier(t, N, k, src, true)
 }
 
 // cmpFourier computes the Fourier transform of src
 // and compares it to the FFT result.
-func cmpFourier(t *testing.T, N int, k uint, src []fermat) {
-	t.Logf("testFourier(t, %d, %d)", N, k)
+func cmpFourier(t *testing.T, N int, k uint, src []fermat, inverse bool) {
+	t.Logf("testFourier(t, %d, %d, inverse=%v)", N, k, inverse)
 	ωshift := (4 * N * _W) >> k
+	if inverse {
+		ωshift = -ωshift
+	}
 	dst1 := make([]fermat, 1<<k)
 	dst2 := make([]fermat, 1<<k)
 	for i := range src {
@@ -120,7 +125,7 @@ func cmpFourier(t *testing.T, N int, k uint, src []fermat) {
 	}
 
 	// fast transform
-	fourier(dst2, src, false, N, k)
+	fourier(dst2, src, inverse, N, k)
 
 	for i := range src {
 		if cmpnat(t, nat(dst1[i]), nat(dst2[i])) != 0 {
