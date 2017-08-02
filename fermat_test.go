@@ -15,14 +15,13 @@ func parseHex(s string) fermat {
 	return append(fermat(z.Bits()), 0)
 }
 
-func compare(t *testing.T, a, b fermat) error {
+func compare(t *testing.T, prefix string, a, b fermat) {
 	var x, y Int
 	x.SetBits(a)
 	y.SetBits(b)
 	if x.Cmp(&y) != 0 {
-		return fmt.Errorf("%x != %x (%x)", &x, &y, new(Int).Xor(&x, &y))
+		t.Errorf("%s: %x != %x", prefix, &x, &y)
 	}
-	return nil
 }
 
 func TestFermatShift(t *testing.T) {
@@ -47,9 +46,7 @@ func TestFermatShift(t *testing.T) {
 			z2 = z2.Lsh(z2, uint(shift))
 		}
 		z2 = z2.Mod(z2, b)
-		if err := compare(t, z, z2.Bits()); err != nil {
-			t.Errorf("error in shift by %d: %s", shift, err)
-		}
+		compare(t, fmt.Sprintf("shift %d", shift), z, z2.Bits())
 	}
 }
 
@@ -74,9 +71,7 @@ func TestFermatShiftHalf(t *testing.T) {
 		z2 := new(Int)
 		z2 = z2.Lsh(new(Int).SetBits(f), uint(shift))
 		z2 = z2.Mod(z2, b)
-		if err := compare(t, z, z2.Bits()); err != nil {
-			t.Errorf("error in shift by %d: %s", shift, err)
-		}
+		compare(t, fmt.Sprintf("shift %d", shift), z, z2.Bits())
 	}
 }
 
@@ -102,10 +97,10 @@ var addTests = []test{
 }
 
 func TestFermatAdd(t *testing.T) {
-	for _, item := range addTests {
+	for i, item := range addTests {
 		z := make(fermat, len(item.a))
 		z = z.Add(item.a, item.b)
-		compare(t, z, item.c)
+		compare(t, fmt.Sprintf("addTests[%d]", i), z, item.c)
 	}
 }
 
@@ -115,12 +110,35 @@ var mulTests = []test{
 		parseHex("0xc21a937a76f3432ffd73d97e447606b683ecf6f6e4a7ae223c2578e26c486a03"),
 		parseHex("0x0e65f4d3508036eaca8faa2b8194ace009c863e44bdc040c459a7127bf8bcc62"),
 	},
+	{ // 2^256 * 2^256 mod (2^256+1) = 1.
+		parseHex("0x10000000000000000000000000000000000000000000000000000000000000000")[:5],
+		parseHex("0x10000000000000000000000000000000000000000000000000000000000000000")[:5],
+		parseHex("0x1"),
+	},
+	{ // (2^256-1) * (2^256-1) mod (2^256+1) = 4.
+		parseHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+		parseHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+		parseHex("0x4"),
+	},
+	{ // 1<<(64W) * 1<<(64W) mod (1<<64W+1) = 1
+		fermat{64: 1},
+		fermat{64: 1},
+		fermat{0: 1},
+	},
+	{
+		// Test case from issue 1. One of the squares of the Fourier
+		// transforms was miscomputed.
+		// The input number is made of 18 words, but we are working modulo 2^1280+1
+		append(parseHex("0xfffffffffffffffffffffffeffffffffffffffffffffffffffffffffffff00000000000000000000000100000000000000000000000000000000000000000000000000000000fffeffffffffffffffffffffffffffffffffffffffffffffffffffffffff000100000000000000000000000100000000000000000000000000000000fffefffffffffffffffffffd"), 0, 0),
+		append(parseHex("0xfffffffffffffffffffffffeffffffffffffffffffffffffffffffffffff00000000000000000000000100000000000000000000000000000000000000000000000000000000fffeffffffffffffffffffffffffffffffffffffffffffffffffffffffff000100000000000000000000000100000000000000000000000000000000fffefffffffffffffffffffd"), 0, 0),
+		parseHex("0xfffe00000003fffc0000000000000000fff40003000000000000000000060001fffffffd0001fffffffffffffffe000dfffbfffffffffffffffffffafffe0000000200000000000000000002fff60002fffffffffffffffa00060001ffffffff0000000000000000fffc0007fffe0000000000000007fff8fffdfffffffffffffffffffa00000004fffa0000fffffffffffffff600080000000000000000000a"),
+	},
 }
 
 func TestFermatMul(t *testing.T) {
-	for _, item := range mulTests {
+	for i, item := range mulTests {
 		z := make(fermat, 3*len(item.a))
 		z = z.Mul(item.a, item.b)
-		compare(t, z, item.c)
+		compare(t, fmt.Sprintf("mulTests[%d]", i), z, item.c)
 	}
 }
