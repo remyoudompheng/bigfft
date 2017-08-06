@@ -268,19 +268,24 @@ func BenchmarkMulBig_1kb(b *testing.B)   { benchmarkMulBig(b, 1e3, 1e3) }
 func BenchmarkMulBig_10kb(b *testing.B)  { benchmarkMulBig(b, 1e4, 1e4) }
 func BenchmarkMulBig_50kb(b *testing.B)  { benchmarkMulBig(b, 5e4, 5e4) }
 func BenchmarkMulBig_100kb(b *testing.B) { benchmarkMulBig(b, 1e5, 1e5) }
+func BenchmarkMulBig_200kb(b *testing.B) { benchmarkMulBig(b, 2e5, 2e5) }
+func BenchmarkMulBig_500kb(b *testing.B) { benchmarkMulBig(b, 5e5, 5e5) }
 func BenchmarkMulBig_1Mb(b *testing.B)   { benchmarkMulBig(b, 1e6, 1e6) }
+func BenchmarkMulBig_2Mb(b *testing.B)   { benchmarkMulBig(b, 2e6, 2e6) }
 func BenchmarkMulBig_5Mb(b *testing.B)   { benchmarkMulBig(b, 5e6, 5e6) }
 func BenchmarkMulBig_10Mb(b *testing.B)  { benchmarkMulBig(b, 10e6, 10e6) }
 func BenchmarkMulBig_20Mb(b *testing.B)  { benchmarkMulBig(b, 20e6, 20e6) }
 func BenchmarkMulBig_50Mb(b *testing.B)  { benchmarkMulBig(b, 50e6, 50e6) }
 func BenchmarkMulBig_100Mb(b *testing.B) { benchmarkMulBig(b, 100e6, 100e6) }
 
-func BenchmarkMulFFT_1kb(b *testing.B)  { benchmarkMulFFT(b, 1e3, 1e3) }
-func BenchmarkMulFFT_10kb(b *testing.B) { benchmarkMulFFT(b, 1e4, 1e4) }
-func BenchmarkMulFFT_50kb(b *testing.B) { benchmarkMulFFT(b, 5e4, 5e4) }
-
+func BenchmarkMulFFT_1kb(b *testing.B)   { benchmarkMulFFT(b, 1e3, 1e3) }
+func BenchmarkMulFFT_10kb(b *testing.B)  { benchmarkMulFFT(b, 1e4, 1e4) }
+func BenchmarkMulFFT_50kb(b *testing.B)  { benchmarkMulFFT(b, 5e4, 5e4) }
 func BenchmarkMulFFT_100kb(b *testing.B) { benchmarkMulFFT(b, 1e5, 1e5) }
+func BenchmarkMulFFT_200kb(b *testing.B) { benchmarkMulFFT(b, 2e5, 2e5) }
+func BenchmarkMulFFT_500kb(b *testing.B) { benchmarkMulFFT(b, 5e5, 5e5) }
 func BenchmarkMulFFT_1Mb(b *testing.B)   { benchmarkMulFFT(b, 1e6, 1e6) }
+func BenchmarkMulFFT_2Mb(b *testing.B)   { benchmarkMulFFT(b, 2e6, 2e6) }
 func BenchmarkMulFFT_5Mb(b *testing.B)   { benchmarkMulFFT(b, 5e6, 5e6) }
 func BenchmarkMulFFT_10Mb(b *testing.B)  { benchmarkMulFFT(b, 10e6, 10e6) }
 func BenchmarkMulFFT_20Mb(b *testing.B)  { benchmarkMulFFT(b, 20e6, 20e6) }
@@ -299,11 +304,12 @@ func benchmarkMul(b *testing.B, sizex, sizey int) {
 	}
 }
 
-func BenchmarkMul_1kb(b *testing.B)   { benchmarkMul(b, 1e3, 1e3) }
-func BenchmarkMul_10kb(b *testing.B)  { benchmarkMul(b, 1e4, 1e4) }
 func BenchmarkMul_50kb(b *testing.B)  { benchmarkMul(b, 5e4, 5e4) }
 func BenchmarkMul_100kb(b *testing.B) { benchmarkMul(b, 1e5, 1e5) }
+func BenchmarkMul_200kb(b *testing.B) { benchmarkMul(b, 2e5, 2e5) }
+func BenchmarkMul_500kb(b *testing.B) { benchmarkMul(b, 5e5, 5e5) }
 func BenchmarkMul_1Mb(b *testing.B)   { benchmarkMul(b, 1e6, 1e6) }
+func BenchmarkMul_2Mb(b *testing.B)   { benchmarkMul(b, 2e6, 2e6) }
 func BenchmarkMul_5Mb(b *testing.B)   { benchmarkMul(b, 5e6, 5e6) }
 func BenchmarkMul_10Mb(b *testing.B)  { benchmarkMul(b, 10e6, 10e6) }
 func BenchmarkMul_20Mb(b *testing.B)  { benchmarkMul(b, 20e6, 20e6) }
