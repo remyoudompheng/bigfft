@@ -81,34 +81,56 @@ func TestCalibrateFFT(t *testing.T) {
 		return
 	}
 
-K:
+	lows := [...]int{10, 10, 10, 10,
+		20, 50, 100, 200, 500, // 8
+		1000, 2000, 5000, 10000, // 12
+		20000, 50000, 100e3, 200e3, // 16
+	}
+	his := [...]int{100, 100, 100, 200,
+		500, 1000, 2000, 5000, 10000, // 8
+		50e3, 100e3, 200e3, 800e3, // 12
+		2e6, 5e6, 10e6, 20e6, // 16
+	}
 	for k := uint(3); k < 16; k++ {
 		// Measure the speedup between k and k+1
-		low := 10 << k
-		hi := 500 << k
-		low1, low2 := measureFFTSize(low, k), measureFFTSize(low, k+1)
-		lowX := float64(low1) / float64(low2) // less than 1
-		fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, low, lowX)
-		hi1, hi2 := measureFFTSize(hi, k), measureFFTSize(hi, k+1)
-		hiX := float64(hi1) / float64(hi2) // larger than 1
-		fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, hi, hiX)
-		for i := 0; i < 10; i++ {
-			mid := (low + hi) / 2
-			mid1, mid2 := measureFFTSize(mid, k), measureFFTSize(mid, k+1)
-			midX := float64(mid1) / float64(mid2)
-			fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, mid, midX)
-			switch {
-			case midX < 0.98:
-				low = mid
-				lowX = midX
-			case midX > 1.02:
-				hi = mid
-				hiX = midX
-			default:
-				fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, low, lowX)
-				fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, hi, hiX)
-				continue K
+		low := lows[k] // FFT of size 1<<k known to be faster
+		hi := his[k]   // FFT of size 2<<k known to be faster
+		var sizes [9]int
+		var speedups [9]float64
+		for i := 0; i < 3; i++ {
+			for idx := 1; idx <= 9; idx++ {
+				sz := ((10-idx)*low + idx*hi) / 10
+				t1, t2 := measureFFTSize(sz, k), measureFFTSize(sz, k+1)
+				spd := float64(t1) / float64(t2)
+				sizes[idx-1] = sz
+				speedups[idx-1] = spd
+				fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, sz, spd)
+			}
+			narrow := false
+			for idx, s := range speedups {
+				if s < .98 {
+					low = sizes[idx]
+					narrow = true
+				} else {
+					break
+				}
+			}
+			for idx := range speedups {
+				if speedups[8-idx] > 1.02 {
+					hi = sizes[8-idx]
+					narrow = true
+				} else {
+					break
+				}
+			}
+			if low >= hi {
+				panic("impossible")
+			}
+			if !narrow || (hi-low) <= 10 {
+				break
 			}
 		}
+		fmt.Printf("sizes: %d\n", sizes)
+		fmt.Printf("speedups: %.2f\n", speedups)
 	}
 }
