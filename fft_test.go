@@ -291,6 +291,9 @@ func BenchmarkMulFFT_10Mb(b *testing.B)  { benchmarkMulFFT(b, 10e6, 10e6) }
 func BenchmarkMulFFT_20Mb(b *testing.B)  { benchmarkMulFFT(b, 20e6, 20e6) }
 func BenchmarkMulFFT_50Mb(b *testing.B)  { benchmarkMulFFT(b, 50e6, 50e6) }
 func BenchmarkMulFFT_100Mb(b *testing.B) { benchmarkMulFFT(b, 100e6, 100e6) }
+func BenchmarkMulFFT_200Mb(b *testing.B) { benchmarkMulFFT(b, 200e6, 200e6) }
+func BenchmarkMulFFT_500Mb(b *testing.B) { benchmarkMulFFT(b, 500e6, 500e6) }
+func BenchmarkMulFFT_1Gb(b *testing.B)   { benchmarkMulFFT(b, 1e9, 1e9) }
 
 func benchmarkMul(b *testing.B, sizex, sizey int) {
 	mulx := rndNat(sizex / _W)

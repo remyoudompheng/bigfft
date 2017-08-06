@@ -24,6 +24,14 @@ func measureMul(th int) (tBig, tFFT time.Duration) {
 	return
 }
 
+func roundDur(d time.Duration) time.Duration {
+	if d > 100*time.Millisecond {
+		return d / time.Millisecond * time.Millisecond
+	} else {
+		return d / time.Microsecond * time.Microsecond
+	}
+}
+
 func TestCalibrateThreshold(t *testing.T) {
 	if !*calibrate {
 		t.Log("not calibrating, use -calibrate to do so.")
@@ -33,30 +41,44 @@ func TestCalibrateThreshold(t *testing.T) {
 	lower := int(1e3)   // math/big is faster at this size.
 	upper := int(300e3) // FFT is faster at this size.
 
-	big, fft := measureMul(lower)
-	lowerX := float64(big) / float64(fft)
-	fmt.Printf("speedup at size %d: %.2f\n", lower, lowerX)
-	big, fft = measureMul(upper)
-	upperX := float64(big) / float64(fft)
-	fmt.Printf("speedup at size %d: %.2f\n", upper, upperX)
-	for {
-		mid := (lower + upper) / 2
-		big, fft := measureMul(mid)
-		X := float64(big) / float64(fft)
-		fmt.Printf("speedup at size %d: %.2f\n", mid, X)
-		switch {
-		case X < 0.98:
-			lower = mid
-			lowerX = X
-		case X > 1.02:
-			upper = mid
-			upperX = X
-		default:
-			fmt.Printf("speedup at size %d: %.2f\n", lower, lowerX)
-			fmt.Printf("speedup at size %d: %.2f\n", upper, upperX)
-			return
+	var sizes [9]int
+	var speedups [9]float64
+	for i := 0; i < 3; i++ {
+		for idx := 1; idx <= 9; idx++ {
+			sz := ((10-idx)*lower + idx*upper) / 10
+			big, fft := measureMul(sz)
+			spd := float64(big) / float64(fft)
+			sizes[idx-1] = sz
+			speedups[idx-1] = spd
+			fmt.Printf("speedup of FFT over math/big at size %d bits: %.2f (%s vs %s)\n",
+				sz, spd, roundDur(big), roundDur(fft))
+		}
+		narrow := false
+		for idx, s := range speedups {
+			if s < .98 {
+				lower = sizes[idx]
+				narrow = true
+			} else {
+				break
+			}
+		}
+		for idx := range speedups {
+			if speedups[8-idx] > 1.02 {
+				upper = sizes[8-idx]
+				narrow = true
+			} else {
+				break
+			}
+		}
+		if lower >= upper {
+			panic("impossible")
+		}
+		if !narrow || (upper-lower) <= 10 {
+			break
 		}
 	}
+	fmt.Printf("sizes: %d\n", sizes)
+	fmt.Printf("speedups: %.2f\n", speedups)
 }
 
 func measureFFTSize(w int, k uint) time.Duration {
@@ -91,7 +113,7 @@ func TestCalibrateFFT(t *testing.T) {
 		50e3, 100e3, 200e3, 800e3, // 12
 		2e6, 5e6, 10e6, 20e6, // 16
 	}
-	for k := uint(3); k < 16; k++ {
+	for k := uint(3); k <= 16; k++ {
 		// Measure the speedup between k and k+1
 		low := lows[k] // FFT of size 1<<k known to be faster
 		hi := his[k]   // FFT of size 2<<k known to be faster
@@ -104,7 +126,8 @@ func TestCalibrateFFT(t *testing.T) {
 				spd := float64(t1) / float64(t2)
 				sizes[idx-1] = sz
 				speedups[idx-1] = spd
-				fmt.Printf("speedup of %d vs %d at size %d words: %.2f\n", k+1, k, sz, spd)
+				fmt.Printf("speedup of %d vs %d at size %d words: %.2f (%s vs %s)\n",
+					k+1, k, sz, spd, roundDur(t1), roundDur(t2))
 			}
 			narrow := false
 			for idx, s := range speedups {
