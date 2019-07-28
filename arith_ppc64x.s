@@ -1,5 +1,7 @@
 // Trampolines to math/big assembly implementations.
 
+// +build ppc64 ppc64le
+
 #include "textflag.h"
 
 // func addVV(z, x, y []Word) (c Word)
