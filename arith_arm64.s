@@ -1,3 +1,4 @@
+//+build !noasm !gccgo
 // Trampolines to math/big assembly implementations.
 
 #include "textflag.h"
