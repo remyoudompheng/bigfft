@@ -2,8 +2,12 @@ package bigfft
 
 import (
 	"fmt"
-	. "math/big"
+	"math/big"
 	"testing"
+)
+
+type (
+	Int = big.Int
 )
 
 // parseHex reads an hex-formatted number modulo 2^bits+1.
@@ -35,9 +39,9 @@ func TestFermatShift(t *testing.T) {
 	for i := 0; i < n; i++ {
 		f[i] = Word(rnd.Int63())
 	}
-	b := NewInt(1)
+	b := big.NewInt(1)
 	b = b.Lsh(b, uint(n*_W))
-	b = b.Add(b, NewInt(1))
+	b = b.Add(b, big.NewInt(1))
 	z := make(fermat, len(f)) // Test with uninitialized z.
 	for shift := -2048; shift < 2048; shift++ {
 		z.Shift(f, shift)
@@ -61,9 +65,9 @@ func TestFermatShiftHalf(t *testing.T) {
 	for i := 0; i < n; i++ {
 		f[i] = ^Word(0)
 	}
-	b := NewInt(1)
+	b := big.NewInt(1)
 	b = b.Lsh(b, uint(n*_W))
-	b = b.Add(b, NewInt(1))
+	b = b.Add(b, big.NewInt(1))
 	z := make(fermat, len(f)) // Test with uninitialized z.
 	tmp := make(fermat, len(f))
 	tmp2 := make(fermat, len(f))
