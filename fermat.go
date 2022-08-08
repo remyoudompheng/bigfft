@@ -25,7 +25,7 @@ func (z fermat) norm() {
 		return
 	}
 	// z[0] < z[n].
-	subVW(z, z, c) // Substract c
+	subVW(z, z, c) // Subtract c
 	if c > 1 {
 		z[n] -= c - 1
 		c = 1
@@ -122,7 +122,7 @@ func (z fermat) Add(x, y fermat) fermat {
 	return z
 }
 
-// Sub computes substraction mod 2^n+1.
+// Sub computes subtraction mod 2^n+1.
 func (z fermat) Sub(x, y fermat) fermat {
 	if len(z) != len(x) {
 		panic("Add: len(z) != len(x)")

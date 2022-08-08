@@ -1,4 +1,4 @@
-# These benchamrks were realised using gmpbench at
+# These benchmarks were realised using gmpbench at
 # http://gmplib.org/gmpbench.html
 # and converted to the go test output format.
 # Numbers are for a Core i5-4590 with GMP 6.1.2
